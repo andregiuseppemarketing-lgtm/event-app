@@ -1,0 +1,92 @@
+import { withAuth } from 'next-auth/middleware';
+import { NextResponse } from 'next/server';
+
+export default withAuth(
+  function middleware(req) {
+    const { pathname } = req.nextUrl;
+    const token = req.nextauth.token;
+
+    // Se non c'è token, withAuth gestisce già il redirect
+    if (!token) {
+      return NextResponse.next();
+    }
+
+    const userRole = token.role as string;
+
+    // Admin può accedere a tutto
+    if (userRole === 'ADMIN') {
+      return NextResponse.next();
+    }
+
+    // Controllo accessi basato su ruolo
+    if (pathname.startsWith('/lista') && !['PR', 'ORGANIZER', 'ADMIN'].includes(userRole)) {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+
+    if (pathname.startsWith('/checkin') && !['STAFF', 'ORGANIZER', 'ADMIN'].includes(userRole)) {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+
+    if (pathname.startsWith('/situa') && !['STAFF', 'ORGANIZER', 'ADMIN'].includes(userRole)) {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+
+    // Dashboard: solo ADMIN e ORGANIZER
+    if (pathname.startsWith('/dashboard') && !['ADMIN', 'ORGANIZER'].includes(userRole)) {
+      // Redirect utenti non-admin/organizer alle loro sezioni
+      switch (userRole) {
+        case 'PR':
+          return NextResponse.redirect(new URL('/lista', req.url));
+        case 'STAFF':
+          return NextResponse.redirect(new URL('/situa', req.url));
+        default:
+          return NextResponse.redirect(new URL('/', req.url));
+      }
+    }
+
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        const { pathname } = req.nextUrl;
+
+        // Route pubbliche - sempre accessibili
+        if (
+          pathname === '/' ||
+          pathname.startsWith('/auth/') ||
+          pathname.startsWith('/invite/') ||
+          pathname.startsWith('/ticket/') ||
+          pathname.startsWith('/event/') ||
+          pathname.startsWith('/api/') ||
+          pathname.startsWith('/_next/') ||
+          pathname.startsWith('/favicon.ico') ||
+          pathname.startsWith('/manifest') ||
+          pathname.includes('.')
+        ) {
+          return true;
+        }
+
+        // Tutte le altre route richiedono autenticazione
+        return !!token;
+      },
+    },
+    pages: {
+      signIn: '/auth/login',
+      error: '/auth/error',
+    },
+  }
+);
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
+};

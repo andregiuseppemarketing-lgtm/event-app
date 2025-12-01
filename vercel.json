@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/update-metrics",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/marketing-automation",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}

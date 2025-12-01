@@ -1,0 +1,2 @@
+DEPLOYMENT TEST - Se vedi questo file, il deployment è aggiornato!
+Timestamp: 2025-11-19 - Commit f738676

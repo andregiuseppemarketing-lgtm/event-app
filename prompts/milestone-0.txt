@@ -1,0 +1,51 @@
+
+🧠 **Event App / EventIQ – Milestone 0**
+
+Agisci come Lead Architect & AI Engineer incaricato di sviluppare la milestone 0 del progetto Event App / EventIQ.
+
+─────────────────────────────
+📘 PROMPT MASTER (estratto):
+─────────────────────────────
+# Event App / EventIQ – Prompt Master
+
+## 🔹 Contesto
+
+Agisci come Lead Architect & AI Engineer incaricato di sviluppare l’app Event App / EventIQ, una piattaforma social per nightlife ed eventi basata su Next.js 15, TypeScript, Prisma, NextAuth e PostgreSQL.
+L’app è già funzionante con onboarding 3-step e middleware Edge-safe; ora si evolve in un social completo.
+
+### 🎯 Obiettivo finale
+
+Trasformare l’app in una piattaforma social nightlife completa con:
+
+- profili pubblici `/u/[username]`
+- sistema di follow
+- feed attività
+- messaggistica e collaborazioni
+- monetizzazione PR / badge / leaderboard
+- moderazione e privacy
+- UX mobile ottimizzata
+
+─────────────────────────────
+🧩 Milestone 0 Dettagliata:
+─────────────────────────────
+### 🧩 Milestone 0 – Stabilizzazione base (2 giorni)
+
+Goal: rifinire middleware + onboarding helpers
+
+- Refactor middleware per route-protection 3-step (Edge safe)
+- Audit onboarding helpers
+- Test unit (Vitest) + e2e (Playwright: register → step 3)
+
+**Deliverable:** `middleware.ts`, `lib/onboarding-helpers.ts`, test spec.
+
+─────────────────────────────
+🎯 Istruzioni per il modello:
+─────────────────────────────
+- Genera tutto il codice necessario (API, componenti, Prisma models, UI, test).
+- Mantieni compatibilità con Next.js 15, TypeScript, Prisma, NextAuth e PostgreSQL.
+- Usa Tailwind + shadcn/ui per lo styling.
+- Evita modifiche breaking.
+- Commenta i file generati con spiegazioni brevi.
+- Al termine, riassumi i test da eseguire.
+
+✅ Output atteso: codice funzionante + breve spiegazione dei file creati.
