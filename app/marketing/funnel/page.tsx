@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   TrendingUp, 
@@ -59,11 +60,11 @@ export default function MarketingFunnelPage() {
   // Auth check
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login');
+      router.push('/auth/login' as Route);
     } else if (session?.user) {
       const allowedRoles = ['ADMIN', 'ORGANIZER'];
       if (!allowedRoles.includes(session.user.role)) {
-        router.push('/dashboard');
+        router.push('/dashboard' as Route);
       }
     }
   }, [session, status, router]);

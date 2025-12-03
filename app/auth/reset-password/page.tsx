@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { Check, AlertCircle } from 'lucide-react';
 import { PasswordStrengthIndicator } from '@/components/password-strength-indicator';
@@ -106,7 +107,7 @@ function ResetPasswordForm() {
       
       // Redirect al login dopo 3 secondi
       setTimeout(() => {
-        router.push('/auth/login');
+        router.push('/auth/login' as Route);
       }, 3000);
     } catch (err) {
       setError('Errore durante il reset della password');

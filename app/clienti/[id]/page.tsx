@@ -3,6 +3,7 @@
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import type { Route } from 'next';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,7 +41,7 @@ export default function ClienteDetailPage({ params }: { params: Promise<{ id: st
   });
 
   if (status === 'unauthenticated') {
-    router.push('/auth/login');
+    router.push('/auth/login' as Route);
     return null;
   }
 

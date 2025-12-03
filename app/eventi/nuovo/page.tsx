@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, MapPin, Clock, FileText, Upload, X, Map } from 'lucide-react';
@@ -43,7 +44,7 @@ export default function NewEventPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login');
+      router.push('/auth/login' as Route);
     }
   }, [status, router]);
 
@@ -138,7 +139,7 @@ export default function NewEventPage() {
         throw new Error(data.error || 'Errore durante la creazione');
       }
 
-      router.push('/dashboard');
+      router.push('/dashboard' as Route);
     } catch (err: any) {
       setError(err.message || 'Errore durante la creazione dell\'evento');
     } finally {

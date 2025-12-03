@@ -2,6 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -160,10 +161,10 @@ export default function ClubsPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login');
+      router.push('/auth/login' as Route);
     }
     if (status === 'authenticated' && !['ORGANIZER', 'ADMIN'].includes(session?.user?.role || '')) {
-      router.push('/dashboard');
+      router.push('/dashboard' as Route);
     }
   }, [status, router, session]);
 
@@ -775,7 +776,7 @@ export default function ClubsPage() {
                     </div>
 
                     {/* View Profile Button */}
-                    <Link href={`/clubs/${club.id}`} className="block">
+                    <Link href={`/clubs/${club.id}` as Route} className="block">
                       <Button 
                         variant="default" 
                         className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"

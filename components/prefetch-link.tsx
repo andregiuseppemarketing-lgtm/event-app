@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 
 /**
  * Link ottimizzato con prefetch intelligente
@@ -13,7 +14,7 @@ export function PrefetchLink({
   className,
   prefetch = true,
 }: {
-  href: string;
+  href: Route;
   children: React.ReactNode;
   className?: string;
   prefetch?: boolean;
@@ -52,7 +53,7 @@ export function usePrefetchCriticalRoutes() {
   useEffect(() => {
     // Prefetch route critiche dopo 2 secondi dall'idle
     const timer = setTimeout(() => {
-      const criticalRoutes = [
+      const criticalRoutes: Route[] = [
         '/dashboard',
         '/eventi',
         '/biglietti',

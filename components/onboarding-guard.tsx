@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import type { Route } from 'next';
 
 /**
  * Client-side onboarding guard component
@@ -31,7 +32,7 @@ export function OnboardingGuard({ children }: { children: React.ReactNode }) {
       }
 
       if (status === 'unauthenticated') {
-        router.push('/auth/login');
+        router.push('/auth/login' as Route);
         return;
       }
 
@@ -49,16 +50,16 @@ export function OnboardingGuard({ children }: { children: React.ReactNode }) {
           // If onboarding not complete, redirect to appropriate step
           if (!data.onboardingComplete) {
             if (!data.step1Completed) {
-              router.push('/auth/register');
+              router.push('/auth/register' as Route);
             } else if (!data.step2Completed) {
-              router.push('/onboarding/step-2');
+              router.push('/onboarding/step-2' as Route);
             } else if (!data.step3Completed) {
               // Step 1 & 2 done, but step 3 (username) pending
-              router.push('/onboarding/step-3');
+              router.push('/onboarding/step-3' as Route);
             } else {
               // All steps done but not marked complete (edge case - should not happen)
               // Force to step-3 as fallback
-              router.push('/onboarding/step-3');
+              router.push('/onboarding/step-3' as Route);
             }
           } else {
             // Onboarding complete, allow access

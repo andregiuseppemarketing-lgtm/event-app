@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import type { Route } from 'next';
 import { useToast } from '@/hooks/use-toast';
 import { Check, X, Loader2 } from 'lucide-react';
 
@@ -24,7 +25,7 @@ export default function OnboardingStep3Page() {
   // Redirect if not authenticated
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login');
+      router.push('/auth/login' as Route);
     }
   }, [status, router]);
 
@@ -120,7 +121,7 @@ export default function OnboardingStep3Page() {
       });
 
       // Redirect to user profile (onboarding complete)
-      const nextPage = data.data?.nextStep || '/user/profilo';
+      const nextPage = (data.data?.nextStep as Route | undefined) || '/user/profilo';
       console.log('[Step 3] Redirecting to:', nextPage);
       router.push(nextPage);
     } catch (error) {

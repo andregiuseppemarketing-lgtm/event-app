@@ -5,8 +5,7 @@ const nextConfig = {
   poweredByHeader: false,
   
   experimental: {
-    typedRoutes: false,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'recharts'],
+    optimizePackageImports: ['lucide-react', 'react-hook-form'],
   },
   
   output: 'standalone',

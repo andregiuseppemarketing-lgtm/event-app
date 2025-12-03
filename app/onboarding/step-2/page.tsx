@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import type { Route } from 'next';
 import { Checkbox } from '@/components/ui/checkbox';
 import { BirthDatePicker } from '@/components/auth/birth-date-picker';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +28,7 @@ export default function OnboardingStep2Page() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login');
+      router.push('/auth/login' as Route);
     }
   }, [status, router]);
 
@@ -92,7 +93,7 @@ export default function OnboardingStep2Page() {
         description: data.data?.message || 'Ora scegli il tuo username',
       });
 
-      const nextStep = data.data?.nextStep || '/onboarding/step-3';
+      const nextStep = (data.data?.nextStep as Route | undefined) || '/onboarding/step-3';
       console.log('[Step 2] Redirecting to:', nextStep);
       router.push(nextStep);
     } catch (error) {

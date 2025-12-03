@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { ChatButton } from '@/components/chat-button';
+import { FollowButton } from '@/components/follow-button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, Users, CheckCircle2, Music } from 'lucide-react';
 import Image from 'next/image';
@@ -132,12 +133,18 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
               </a>
             )}
 
-            {/* Chat Button */}
-            <ChatButton
-              whatsappNumber={profile.whatsappNumber}
-              telegramHandle={profile.telegramHandle}
-              className="w-full md:w-auto"
-            />
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <FollowButton
+                targetSlug={slug}
+                className="flex-1 md:flex-initial"
+              />
+              <ChatButton
+                whatsappNumber={profile.whatsappNumber}
+                telegramHandle={profile.telegramHandle}
+                className="flex-1 md:flex-initial"
+              />
+            </div>
           </div>
         </div>
 

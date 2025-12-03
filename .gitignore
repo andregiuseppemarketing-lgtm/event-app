@@ -20,3 +20,5 @@ public/uploads/
 
 # Prompt e file di test
 prompts/*.txt
+.vercel
+.env*.local

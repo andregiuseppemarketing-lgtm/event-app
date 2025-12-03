@@ -3,6 +3,7 @@
 import { use, useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { 
   Users, 
   UserPlus, 
@@ -106,12 +107,12 @@ export default function EventDashboardPage({
     if (status === 'loading') return;
 
     if (!session) {
-      router.push('/auth/signin');
+      router.push('/auth/signin' as Route);
       return;
     }
 
     if (!['ORGANIZER', 'ADMIN'].includes(session.user.role)) {
-      router.push('/dashboard');
+      router.push('/dashboard' as Route);
       return;
     }
   }, [session, status, router]);

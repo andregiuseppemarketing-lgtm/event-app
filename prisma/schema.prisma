@@ -35,67 +35,54 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?   // DEPRECATED: use firstName + lastName
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String?
-  role          UserRole  @default(USER)
-  phone         String?
-
-  // Real Identity (for verification) - CAN BE DUPLICATED
-  firstName   String?   // Nome reale (required per verifica identità)
-  lastName    String?   // Cognome reale (required per verifica identità)
-  middleName  String?   // Secondo nome (opzionale)
-  
-  // Public Identity (social network) - MUST BE UNIQUE
-  username    String?   @unique // Nickname unico (es. @johnny.doe_23) - ONLY letters, numbers, dot (.), underscore (_)
-  displayName String?   // Nome pubblico display (es. "Johnny")
-
-  // Age Verification
-  birthDate   DateTime?
-  age         Int?
-  ageVerified Boolean   @default(false)
-  ageConsent  Boolean   @default(false)
-
-  // Identity Verification
-  identityVerified   Boolean   @default(false)
-  identityVerifiedAt DateTime?
-
-  // Password Reset
-  resetToken       String?
-  resetTokenExpiry DateTime?
-
+  id                    String                 @id @default(cuid())
+  name                  String?
+  email                 String                 @unique
+  emailVerified         DateTime?
+  image                 String?
+  passwordHash          String?
+  role                  UserRole               @default(USER)
+  phone                 String?
+  birthDate             DateTime?
+  age                   Int?
+  ageConsent            Boolean                @default(false)
+  identityVerified      Boolean                @default(false)
+  identityVerifiedAt    DateTime?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
+  ageVerified           Boolean                @default(false)
+  displayName           String?
+  firstName             String?
+  lastName              String?
+  middleName            String?
+  username              String?                @unique
+  resetToken            String?
+  resetTokenExpiry      DateTime?
   accounts              Account[]
   sessions              Session[]
+  artistProfile         ArtistProfile?
   auditLogs             AuditLog[]
   checkins              CheckIn[]
+  clubsOwned            Club[]                 @relation("ClubOwner")
   eventsCreated         Event[]                @relation("EventCreator")
+  feedComments          FeedComment[]
+  feedItems             FeedItem[]             @relation("FeedItemAuthor")
+  feedLikes             FeedLike[]
+  reviewedVerifications IdentityVerification[] @relation("VerificationReviewer")
+  identityVerifications IdentityVerification[]
   inviteLinks           InviteLink[]
   listEntries           ListEntry[]            @relation("ListEntryCreator")
+  onboardingProgress    OnboardingProgress?
+  organizationProfile   OrganizationProfile?
   prProfile             PRProfile?
   securityReports       SecurityNote[]
   ticketsIssued         Ticket[]               @relation("TicketIssuer")
   ticketsOwned          Ticket[]               @relation("TicketOwner")
-  clubsOwned            Club[]                 @relation("ClubOwner")
-  organizationProfile   OrganizationProfile?
-  artistProfile         ArtistProfile?
-  userProfile           UserProfile?
-  feedItems             FeedItem[]             @relation("FeedItemAuthor")
-  feedLikes             FeedLike[]
-  feedComments          FeedComment[]
-  followedBy            UserFollow[]           @relation("Following")
-  following             UserFollow[]           @relation("Follower")
-  identityVerifications IdentityVerification[]
-  reviewedVerifications IdentityVerification[] @relation("VerificationReviewer")
-  
-  // Onboarding relations
-  phoneVerification     UserPhone?
   consents              UserConsent?
-  onboardingProgress    OnboardingProgress?
+  following             UserFollow[]           @relation("Follower")
+  followedBy            UserFollow[]           @relation("Following")
+  phoneVerification     UserPhone?
+  userProfile           UserProfile?
 
   @@map("users")
 }
@@ -137,17 +124,17 @@ model Club {
 model Venue {
   id             String   @id @default(cuid())
   name           String
-  slug           String?  @unique // Custom URL slug (e.g., /venue/discoteca-milano)
   address        String
   city           String
   capacity       Int?
-  whatsappNumber String?  // WhatsApp contact for chat button
-  telegramHandle String?  // Telegram handle for chat button
   clubId         String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  club           Club?    @relation(fields: [clubId], references: [id])
+  slug           String?  @unique
+  telegramHandle String?
+  whatsappNumber String?
   events         Event[]
+  club           Club?    @relation(fields: [clubId], references: [id])
 
   @@map("venues")
 }
@@ -489,22 +476,15 @@ model CustomerPreferences {
   @@map("customer_preferences")
 }
 
-// ============================================
-// ORGANIZATION & PROMOTER PROFILES
-// ============================================
-
 model OrganizationProfile {
   id               String               @id @default(cuid())
   userId           String               @unique
-  slug             String?              @unique // Custom URL slug (e.g., /org/panico-events)
   organizationName String
   bio              String?
   website          String?
   instagram        String?
   facebook         String?
   twitter          String?
-  whatsappNumber   String?              // WhatsApp contact for chat button
-  telegramHandle   String?              // Telegram handle for chat button
   logo             String?
   coverImage       String?
   verified         Boolean              @default(false)
@@ -512,8 +492,11 @@ model OrganizationProfile {
   totalAttendees   Int                  @default(0)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
-  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug             String?              @unique
+  telegramHandle   String?
+  whatsappNumber   String?
   teamMembers      OrganizationMember[]
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([verified])
   @@map("organization_profiles")
@@ -533,10 +516,6 @@ model OrganizationMember {
 
   @@map("organization_members")
 }
-
-// ============================================
-// ARTIST PROFILES (DJ, VOCALIST, etc.)
-// ============================================
 
 model ArtistProfile {
   id           String        @id @default(cuid())
@@ -559,9 +538,9 @@ model ArtistProfile {
   rating       Float?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  mediaGallery ArtistMedia[]
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   performances Performance[]
-  mediaGallery ArtistMedia[]
 
   @@index([artistType])
   @@index([verified])
@@ -604,40 +583,32 @@ model ArtistMedia {
   @@map("artist_media")
 }
 
-// ============================================
-// USER PROFILE & SOCIAL FEED
-// ============================================
-
 model UserProfile {
   id              String    @id @default(cuid())
   userId          String    @unique
-  slug            String?   @unique // Custom URL slug (e.g., /u/mario-rossi)
   bio             String?
   avatar          String?
   coverImage      String?
-  provincia       String?   // Sigla provincia (es. MI, RM, NA)
   city            String?
-  birthDate       DateTime? // DEPRECATED: use User.birthDate
+  birthDate       DateTime?
   gender          Gender?
   interests       String[]  @default([])
   favoriteGenres  String[]  @default([])
   preferredVenues String[]  @default([])
-  tiktokHandle    String?   // TikTok handle
-  spotifyUrl      String?   // Spotify profile
-  whatsappNumber  String?   // WhatsApp contact
-  telegramHandle  String?   // Telegram handle
   isPublic        Boolean   @default(true)
-  
-  // Social Stats
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   followersCount  Int       @default(0)
   followingCount  Int       @default(0)
   postsCount      Int       @default(0)
-  
-  // Verification Badge
-  verifiedBadge   Boolean   @default(false) // Blue check badge (separate from identity)
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  spotifyUrl      String?
+  tiktokHandle    String?
+  instagram       String?
+  verifiedBadge   Boolean   @default(false)
+  slug            String?   @unique
+  telegramHandle  String?
+  whatsappNumber  String?
+  provincia       String?
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_profiles")
@@ -670,9 +641,9 @@ model FeedItem {
   commentsCount Int           @default(0)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  comments      FeedComment[]
   author        User          @relation("FeedItemAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   likes         FeedLike[]
-  comments      FeedComment[]
 
   @@index([authorId])
   @@index([createdAt])
@@ -707,6 +678,85 @@ model FeedComment {
   @@index([feedItemId])
   @@index([userId])
   @@map("feed_comments")
+}
+
+model IdentityVerification {
+  id               String             @id @default(cuid())
+  userId           String
+  documentType     DocumentType
+  documentNumber   String?
+  documentFrontUrl String
+  documentBackUrl  String?
+  selfieUrl        String
+  status           VerificationStatus @default(PENDING)
+  reviewedBy       String?
+  reviewedAt       DateTime?
+  rejectionReason  String?
+  expiresAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  reviewer         User?              @relation("VerificationReviewer", fields: [reviewedBy], references: [id])
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("identity_verifications")
+}
+
+model UserPhone {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  phoneNumber     String    @unique
+  phoneVerified   Boolean   @default(false)
+  phoneVerifiedAt DateTime?
+  otpCode         String?
+  otpExpiresAt    DateTime?
+  otpAttempts     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([phoneNumber])
+  @@index([userId])
+  @@map("user_phones")
+}
+
+model UserConsent {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  termsAccepted     Boolean   @default(false)
+  termsAcceptedAt   DateTime?
+  privacyAccepted   Boolean   @default(false)
+  privacyAcceptedAt DateTime?
+  marketingOptIn    Boolean   @default(false)
+  marketingOptInAt  DateTime?
+  newsletterOptIn   Boolean   @default(false)
+  newsletterOptInAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_consents")
+}
+
+model OnboardingProgress {
+  id                 String    @id @default(cuid())
+  userId             String    @unique
+  currentStep        Int       @default(1)
+  step1Completed     Boolean   @default(false)
+  step2Completed     Boolean   @default(false)
+  step3Completed     Boolean   @default(false)
+  onboardingComplete Boolean   @default(false)
+  completedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([onboardingComplete])
+  @@map("onboarding_progress")
 }
 
 enum ClubType {
@@ -768,7 +818,10 @@ enum TicketType {
 
 enum TicketStatus {
   NEW
+  PENDING
+  PAID
   USED
+  CHECKED_IN
   CANCELLED
 }
 
@@ -835,89 +888,4 @@ enum VerificationStatus {
   APPROVED
   REJECTED
   EXPIRED
-}
-
-model IdentityVerification {
-  id               String             @id @default(cuid())
-  userId           String
-  documentType     DocumentType
-  documentNumber   String?
-  documentFrontUrl String
-  documentBackUrl  String?
-  selfieUrl        String
-  status           VerificationStatus @default(PENDING)
-  reviewedBy       String?
-  reviewedAt       DateTime?
-  rejectionReason  String?
-  expiresAt        DateTime?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-
-  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reviewer User? @relation("VerificationReviewer", fields: [reviewedBy], references: [id])
-
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-  @@map("identity_verifications")
-}
-
-// === ONBOARDING SYSTEM ===
-
-model UserPhone {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  phoneNumber     String    @unique
-  phoneVerified   Boolean   @default(false)
-  phoneVerifiedAt DateTime?
-  otpCode         String?   // Codice OTP temporaneo
-  otpExpiresAt    DateTime? // Scadenza OTP
-  otpAttempts     Int       @default(0) // Tentativi falliti
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([phoneNumber])
-  @@index([userId])
-  @@map("user_phones")
-}
-
-model UserConsent {
-  id                  String    @id @default(cuid())
-  userId              String    @unique
-  termsAccepted       Boolean   @default(false)
-  termsAcceptedAt     DateTime?
-  privacyAccepted     Boolean   @default(false)
-  privacyAcceptedAt   DateTime?
-  marketingOptIn      Boolean   @default(false)
-  marketingOptInAt    DateTime?
-  newsletterOptIn     Boolean   @default(false)
-  newsletterOptInAt   DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("user_consents")
-}
-
-model OnboardingProgress {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  currentStep       Int      @default(1) // 1=email+password, 2=profilo, 3=phone
-  step1Completed    Boolean  @default(false) // Email + Password
-  step2Completed    Boolean  @default(false) // Profilo base
-  step3Completed    Boolean  @default(false) // Verifica telefono
-  onboardingComplete Boolean  @default(false)
-  completedAt       DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([onboardingComplete])
-  @@map("onboarding_progress")
 }

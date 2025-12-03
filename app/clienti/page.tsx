@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import type { Route } from 'next';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,7 +69,7 @@ export default function ClientiPage() {
   });
 
   if (status === 'unauthenticated') {
-    router.push('/auth/login');
+    router.push('/auth/login' as Route);
     return null;
   }
 
@@ -329,7 +330,7 @@ export default function ClientiPage() {
                               variant="ghost"
                               className="btn-ghost"
                             >
-                              <Link href={`/clienti/${guest.id}`}>
+                              <Link href={`/clienti/${guest.id}` as Route}>
                                 Dettagli
                               </Link>
                             </Button>

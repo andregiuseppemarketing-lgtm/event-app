@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { 
   Users, 
   Euro, 
@@ -105,12 +106,12 @@ export default function GeneralDashboardPage() {
     if (status === 'loading') return;
 
     if (!session) {
-      router.push('/auth/signin');
+      router.push('/auth/signin' as Route);
       return;
     }
 
     if (!['ORGANIZER', 'ADMIN'].includes(session.user.role)) {
-      router.push('/dashboard');
+      router.push('/dashboard' as Route);
       return;
     }
   }, [session, status, router]);
@@ -331,7 +332,7 @@ export default function GeneralDashboardPage() {
               {data.topEvents.map((event, idx) => (
                 <Link
                   key={event.id}
-                  href={`/analytics/${event.id}`}
+                  href={`/analytics/${event.id}` as Route}
                   className="block"
                 >
                   <div className="flex items-center justify-between p-4 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
@@ -495,7 +496,7 @@ export default function GeneralDashboardPage() {
               {data.eventsBreakdown.map((event) => (
                 <Link
                   key={event.eventId}
-                  href={`/analytics/${event.eventId}`}
+                  href={`/analytics/${event.eventId}` as Route}
                   className="block"
                 >
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">

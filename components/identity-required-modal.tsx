@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, AlertCircle, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 
 interface IdentityRequiredModalProps {
   isOpen: boolean;
@@ -42,7 +43,7 @@ export function IdentityRequiredModal({ isOpen, onClose, action }: IdentityRequi
 
   const handleGoToVerification = () => {
     onClose();
-    router.push('/verifica-identita');
+    router.push('/verifica-identita' as Route);
   };
 
   return (

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { 
@@ -50,7 +51,8 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login?callbackUrl=/dashboard/profilo');
+      const loginRedirect = `/auth/login?callbackUrl=${encodeURIComponent('/dashboard/profilo')}` as Route;
+      router.push(loginRedirect);
     } else if (status === 'authenticated') {
       loadUserData();
     }
@@ -114,7 +116,7 @@ export default function UserProfilePage() {
         <div className="flex items-center justify-between px-4 py-3">
           {/* Campanella notifiche (sinistra) */}
           <Link
-            href="/dashboard/notifiche"
+            href={"/dashboard/notifiche" as Route}
             className="p-2 hover:bg-accent/10 rounded-full transition relative"
             aria-label="Notifiche"
           >
@@ -245,21 +247,21 @@ export default function UserProfilePage() {
       {/* BOTTOM NAVIGATION - 4 icone */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border z-50">
         <div className="flex items-center justify-around px-6 py-3 max-w-2xl mx-auto">
-          <Link href="/dashboard/profilo" className="p-3 text-primary hover:bg-accent/10 rounded-full transition">
+          <Link href={"/dashboard/profilo" as Route} className="p-3 text-primary hover:bg-accent/10 rounded-full transition">
             <div className="w-7 h-7 rounded-full bg-gradient-to-r from-primary to-accent" />
           </Link>
-          <Link href="/eventi" className="p-3 text-muted-foreground hover:text-primary hover:bg-accent/10 rounded-full transition">
+          <Link href={"/eventi" as Route} className="p-3 text-muted-foreground hover:text-primary hover:bg-accent/10 rounded-full transition">
             <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
               <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
             </svg>
           </Link>
-          <Link href="/search" className="p-3 text-muted-foreground hover:text-primary hover:bg-accent/10 rounded-full transition">
+          <Link href={"/search" as Route} className="p-3 text-muted-foreground hover:text-primary hover:bg-accent/10 rounded-full transition">
             <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </Link>
-          <Link href="/qr-scanner" className="p-3 text-muted-foreground hover:text-primary hover:bg-accent/10 rounded-full transition">
+          <Link href={"/qr-scanner" as Route} className="p-3 text-muted-foreground hover:text-primary hover:bg-accent/10 rounded-full transition">
             <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2V5h1v1H5zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zm2 2v-1h1v1H5zM13 3a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3zm1 2v1h1V5h-1z" clipRule="evenodd"/>
               <path d="M11 4a1 1 0 10-2 0v1a1 1 0 002 0V4zM10 7a1 1 0 011 1v1h2a1 1 0 110 2h-3a1 1 0 01-1-1V8a1 1 0 011-1zM16 9a1 1 0 100 2 1 1 0 000-2zM9 13a1 1 0 011-1h1a1 1 0 110 2v2a1 1 0 11-2 0v-3zM7 11a1 1 0 10-2 0v1a1 1 0 002 0v-1zM17 11a1 1 0 10-2 0v1a1 1 0 002 0v-1zM16 13a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1z"/>

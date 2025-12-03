@@ -2,6 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,10 +48,10 @@ export default function DJDashboardPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login');
+      router.push('/auth/login' as Route);
     }
     if (status === 'authenticated' && session?.user?.role !== 'DJ') {
-      router.push('/dashboard');
+      router.push('/dashboard' as Route);
     }
   }, [status, router, session]);
 
@@ -261,7 +262,7 @@ export default function DJDashboardPage() {
                     )}
 
                     <div className="mt-4 flex gap-2">
-                      <Link href={`/analytics/${event.id}`}>
+                      <Link href={`/analytics/${event.id}` as Route}>
                         <Button variant="outline" size="sm">
                           Vedi Analytics
                         </Button>

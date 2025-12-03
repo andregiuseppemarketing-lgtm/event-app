@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -350,7 +351,7 @@ function EventsList({ events, setActiveTab }: { events: Event[]; setActiveTab: (
                 size="sm"
                 className="btn-ghost"
               >
-                <Link href={`/analytics/${event.id}`}>
+                <Link href={`/analytics/${event.id}` as Route}>
                   <LineChart className="mr-1 h-4 w-4" />
                   Dashboard
                 </Link>
@@ -360,7 +361,7 @@ function EventsList({ events, setActiveTab }: { events: Event[]; setActiveTab: (
                 size="sm"
                 className="btn-ghost"
               >
-                <Link href={`/eventi/${event.id}/consumazioni`}>
+                <Link href={`/eventi/${event.id}/consumazioni` as Route}>
                   <Euro className="mr-1 h-4 w-4" />
                   Consumazioni
                 </Link>
@@ -370,7 +371,7 @@ function EventsList({ events, setActiveTab }: { events: Event[]; setActiveTab: (
                 size="sm"
                 className="btn-ghost"
               >
-                <Link href={`/marketing/funnel`}>
+                <Link href="/marketing/funnel">
                   <Target className="mr-1 h-4 w-4" />
                   Funnel
                 </Link>
@@ -380,7 +381,7 @@ function EventsList({ events, setActiveTab }: { events: Event[]; setActiveTab: (
                 size="sm"
                 className="btn-ghost"
               >
-                <Link href={`/stats/event/${event.id}`}>
+                <Link href={`/stats/event/${event.id}` as Route}>
                   <BarChart3 className="mr-1 h-4 w-4" />
                   Stats
                 </Link>
@@ -390,7 +391,7 @@ function EventsList({ events, setActiveTab }: { events: Event[]; setActiveTab: (
                 size="sm"
                 className="btn-primary"
               >
-                <Link href={`/eventi/${event.id}`}>
+                <Link href={`/eventi/${event.id}` as Route}>
                   Gestisci
                 </Link>
               </Button>
@@ -415,7 +416,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login');
+      router.push('/auth/login' as Route);
     }
     
     // Mostra modal telefono se manca
@@ -695,13 +696,13 @@ export default function DashboardPage() {
                 title="Eventi Totali" 
                 value={stats.totalEvents} 
                 icon={CalendarDays}
-                onClick={() => router.push('/eventi')}
+                onClick={() => router.push('/eventi' as Route)}
               />
               <StatsCard 
                 title="QR Emessi" 
                 value={stats.totalTickets} 
                 icon={QrCode}
-                onClick={() => router.push('/biglietti')}
+                onClick={() => router.push('/biglietti' as Route)}
               />
               <StatsCard 
                 title="Ingressi Totali" 

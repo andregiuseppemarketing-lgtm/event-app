@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, Settings, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 
 export function UserNav() {
   const { data: session } = useSession();
@@ -56,7 +57,7 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
+        <DropdownMenuItem onClick={() => router.push('/dashboard/settings' as Route)}>
           <Settings className="mr-2 h-4 w-4" />
           <span>Impostazioni</span>
         </DropdownMenuItem>

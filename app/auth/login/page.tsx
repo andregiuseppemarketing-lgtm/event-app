@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import type { Route } from 'next';
 import Link from 'next/link';
 
 function LoginForm() {
@@ -13,7 +14,7 @@ function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const callbackUrl = searchParams.get('callbackUrl') || '/user/profilo';
+  const callbackUrl = (searchParams.get('callbackUrl') as Route | null) || '/user/profilo';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +32,7 @@ function LoginForm() {
         setError('Email o password non corretti');
         setLoading(false);
       } else if (result?.ok) {
-        router.push(callbackUrl);
+        router.push(callbackUrl as Route);
       } else {
         setError('Errore durante il login');
         setLoading(false);

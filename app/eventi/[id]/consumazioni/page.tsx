@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, use } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import type { Route } from "next";
 import {
   Euro,
   Plus,
@@ -115,11 +116,11 @@ export default function EventConsumptionsPage({
   // Auth check
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/auth/login");
+      router.push('/auth/login' as Route);
     } else if (session?.user) {
       const allowedRoles = ["ADMIN", "ORGANIZER", "STAFF"];
       if (!allowedRoles.includes(session.user.role)) {
-        router.push("/dashboard");
+        router.push('/dashboard' as Route);
       }
     }
   }, [session, status, router]);

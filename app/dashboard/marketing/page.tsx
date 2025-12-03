@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import type { Route } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -37,10 +38,10 @@ export default function MarketingAutomationPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login');
+      router.push('/auth/login' as Route);
     }
     if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
-      router.push('/dashboard');
+      router.push('/dashboard' as Route);
     }
   }, [status, session, router]);
 

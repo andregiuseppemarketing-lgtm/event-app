@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
+import type { Route } from 'next';
 import { 
   ArrowLeft,
   Heart,
@@ -343,7 +344,10 @@ export default function ClubProfilePage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold">Prossimi Eventi</h2>
-            <Link href={`/clubs/${club.id}/eventi`} className="text-sm text-primary hover:underline">
+            <Link
+              href={`/clubs/${club.id}/eventi` as Route}
+              className="text-sm text-primary hover:underline"
+            >
               Vedi tutti
             </Link>
           </div>

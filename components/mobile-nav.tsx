@@ -7,6 +7,7 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
+import type { Route } from 'next';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Sheet,
@@ -32,6 +33,13 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+type NavItem = {
+  icon: any;
+  label: string;
+  href: Route;
+  roles?: string[];
+};
+
 export function MobileNav() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -50,18 +58,18 @@ export function MobileNav() {
         .slice(0, 2)
     : session.user.email?.[0].toUpperCase() || 'U';
 
-  const navItems = [
-    { icon: Home, label: 'Dashboard', href: '/dashboard' },
-    { icon: Calendar, label: 'Eventi', href: '/eventi' },
-    { icon: QrCode, label: 'Check-in', href: '/checkin', roles: ['ORGANIZER', 'ADMIN'] },
+  const navItems: NavItem[] = [
+    { icon: Home, label: 'Dashboard', href: '/dashboard' as Route },
+    { icon: Calendar, label: 'Eventi', href: '/eventi' as Route },
+    { icon: QrCode, label: 'Check-in', href: '/checkin' as Route, roles: ['ORGANIZER', 'ADMIN'] },
   ];
 
-  const menuItems = [
-    { icon: BarChart3, label: 'Analytics', href: '/analytics/general', roles: ['ORGANIZER', 'ADMIN'] },
-    { icon: Building2, label: 'I Miei Club', href: '/clubs', roles: ['ORGANIZER', 'ADMIN'] },
-    { icon: Mail, label: 'Marketing', href: '/dashboard/marketing', roles: ['ADMIN'] },
-    { icon: Music2, label: 'DJ Dashboard', href: '/dj/dashboard', roles: ['DJ'] },
-    { icon: Settings, label: 'Impostazioni', href: '/dashboard/settings' },
+  const menuItems: NavItem[] = [
+    { icon: BarChart3, label: 'Analytics', href: '/analytics/general' as Route, roles: ['ORGANIZER', 'ADMIN'] },
+    { icon: Building2, label: 'I Miei Club', href: '/clubs' as Route, roles: ['ORGANIZER', 'ADMIN'] },
+    { icon: Mail, label: 'Marketing', href: '/dashboard/marketing' as Route, roles: ['ADMIN'] },
+    { icon: Music2, label: 'DJ Dashboard', href: '/dj/dashboard' as Route, roles: ['DJ'] },
+    { icon: Settings, label: 'Impostazioni', href: '/dashboard/settings' as Route },
   ];
 
   const isActive = (href: string) => pathname === href || pathname?.startsWith(href + '/');
@@ -173,7 +181,7 @@ export function MobileNav() {
               <Button
                 variant="destructive"
                 size="lg"
-                onClick={() => signOut({ callbackUrl: '/auth/login' })}
+                onClick={() => signOut({ callbackUrl: '/auth/login' as Route })}
                 className="w-full"
               >
                 <LogOut className="mr-3 h-5 w-5" />
