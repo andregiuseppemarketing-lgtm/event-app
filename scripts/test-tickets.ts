@@ -9,6 +9,7 @@
  * 5. Tenta check-in duplicato (deve fallire)
  */
 
+(async function testTickets() {
 const BASE_URL = "http://localhost:3000";
 
 interface TestResult {
@@ -356,3 +357,4 @@ async function runTests() {
 
 // Esegui i test
 runTests().catch(console.error);
+})();

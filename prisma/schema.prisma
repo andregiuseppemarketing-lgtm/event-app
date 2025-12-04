@@ -83,6 +83,8 @@ model User {
   followedBy            UserFollow[]           @relation("Following")
   phoneVerification     UserPhone?
   userProfile           UserProfile?
+  userStats             UserStats?
+  analyticsLogs         AnalyticsLog[]
 
   @@map("users")
 }
@@ -149,6 +151,9 @@ model Event {
   status          EventStatus      @default(DRAFT)
   minAge          Int?
   dressCode       String?
+  ticketType      TicketType       @default(FREE_LIST)
+  ticketPrice     Float?
+  maxGuests       Int?             @default(0)
   venueId         String
   createdByUserId String
   createdAt       DateTime         @default(now())
@@ -163,6 +168,7 @@ model Event {
   lists           List[]
   securityNotes   SecurityNote[]
   tickets         Ticket[]
+  eventStats      EventStats[]
 
   @@index([status, dateStart])
   @@index([venueId])
@@ -286,29 +292,33 @@ model ListEntry {
 }
 
 model Ticket {
-  id             String          @id @default(cuid())
-  eventId        String
-  userId         String?
-  guestId        String?
-  listEntryId    String?
-  issuedByUserId String?
-  type           TicketType      @default(LIST)
-  price          Float?
-  currency       String?         @default("EUR")
-  code           String          @unique
-  qrData         String
-  status         TicketStatus    @default(NEW)
-  issuedAt       DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  checkins       CheckIn[]
-  consumptions   Consumption[]
-  feedbacks      EventFeedback[]
-  securityNotes  SecurityNote[]
-  event          Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  guest          Guest?          @relation(fields: [guestId], references: [id])
-  issuedBy       User?           @relation("TicketIssuer", fields: [issuedByUserId], references: [id])
-  listEntry      ListEntry?      @relation(fields: [listEntryId], references: [id])
-  user           User?           @relation("TicketOwner", fields: [userId], references: [id])
+  id                String          @id @default(cuid())
+  eventId           String
+  userId            String?
+  guestId           String?
+  listEntryId       String?
+  issuedByUserId    String?
+  type              TicketType      @default(FREE_LIST)
+  price             Float?
+  currency          String?         @default("EUR")
+  code              String          @unique
+  qrData            String
+  status            TicketStatus    @default(NEW)
+  paid              Boolean         @default(false)
+  paymentIntentId   String?
+  paymentStatus     PaymentStatus   @default(PENDING)
+  receiptUrl        String?
+  issuedAt          DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  checkins          CheckIn[]
+  consumptions      Consumption[]
+  feedbacks         EventFeedback[]
+  securityNotes     SecurityNote[]
+  event             Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guest             Guest?          @relation(fields: [guestId], references: [id])
+  issuedBy          User?           @relation("TicketIssuer", fields: [issuedByUserId], references: [id])
+  listEntry         ListEntry?      @relation(fields: [listEntryId], references: [id])
+  user              User?           @relation("TicketOwner", fields: [userId], references: [id])
 
   @@index([code])
   @@index([eventId, status])
@@ -811,9 +821,13 @@ enum EntryStatus {
 }
 
 enum TicketType {
-  FREE
-  LIST
-  PAID
+  FREE          // Legacy
+  LIST          // Legacy
+  PAID          // Legacy
+  FREE_LIST     // Evento gratuito (solo lista)
+  DOOR_ONLY     // Pagamento al botteghino
+  PRE_SALE      // Prevendita online
+  FULL_TICKET   // Biglietto intero online
 }
 
 enum TicketStatus {
@@ -823,6 +837,13 @@ enum TicketStatus {
   USED
   CHECKED_IN
   CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
 }
 
 enum Gate {
@@ -888,4 +909,46 @@ enum VerificationStatus {
   APPROVED
   REJECTED
   EXPIRED
+}
+
+// MILESTONE 6: Analytics & Stats Models
+model EventStats {
+  id           String   @id @default(cuid())
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketsSold  Int      @default(0)
+  revenueTotal Float    @default(0)
+  checkIns     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([eventId])
+  @@map("event_stats")
+}
+
+model UserStats {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventsCreated Int      @default(0)
+  ticketsBought Int      @default(0)
+  totalSpent    Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("user_stats")
+}
+
+model AnalyticsLog {
+  id         String   @id @default(cuid())
+  actionType String
+  targetId   String?
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meta       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actionType, createdAt])
+  @@index([userId])
+  @@map("analytics_logs")
 }

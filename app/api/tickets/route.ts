@@ -19,9 +19,15 @@ export async function GET(req: NextRequest) {
     const code = searchParams.get('code');
     const eventId = searchParams.get('eventId');
     const status = searchParams.get('status');
+    const myTickets = searchParams.get('myTickets') === 'true';
     const limit = parseInt(searchParams.get('limit') || '100');
 
     const where: any = {};
+
+    // Filtra per userId se richiesto dal dashboard
+    if (myTickets) {
+      where.userId = session.user.id;
+    }
 
     if (code) {
       where.OR = [
@@ -46,7 +52,14 @@ export async function GET(req: NextRequest) {
             id: true,
             title: true,
             dateStart: true,
+            dateEnd: true,
             status: true,
+            venue: {
+              select: {
+                name: true,
+                city: true,
+              }
+            }
           }
         },
         guest: {

@@ -3,6 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authConfig } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
+// ISR: Cache per 60 secondi per feed pubblico
+export const revalidate = 60;
+// Dynamic route - usa headers per auth
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/feed
  * Restituisce eventi pubblici dagli utenti/organizzazioni/locali seguiti

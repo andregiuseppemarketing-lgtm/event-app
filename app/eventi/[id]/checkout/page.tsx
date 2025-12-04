@@ -17,6 +17,8 @@ interface Event {
   dateStart: string;
   dateEnd: string | null;
   coverUrl: string | null;
+  ticketType: 'FREE_LIST' | 'DOOR_ONLY' | 'PRE_SALE' | 'FULL_TICKET' | 'FREE' | 'LIST' | 'PAID';
+  ticketPrice: number | null;
   minAge: number | null;
   dressCode: string | null;
   venue: {
@@ -71,25 +73,106 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
       setCreating(true);
       setError(null);
 
-      const response = await fetch('/api/tickets/issue', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          eventId: eventId,
-          userId: session?.user?.id,
-          type: 'LIST',
-          price: 0,
-          currency: 'EUR',
-        }),
-      });
+      const ticketType = event?.ticketType || 'FREE_LIST';
+      const ticketPrice = event?.ticketPrice ?? 0;
 
-      const data = await response.json();
+      // Logica basata su ticketType
+      switch (ticketType) {
+        case 'FREE_LIST':
+          // Registrazione gratuita via /api/events/register
+          const freeResponse = await fetch('/api/events/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId: eventId }),
+          });
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Errore creazione ticket');
+          const freeData = await freeResponse.json();
+
+          if (!freeResponse.ok) {
+            throw new Error(freeData.error || 'Errore registrazione gratuita');
+          }
+
+          setTicket(freeData.ticket);
+          break;
+
+        case 'DOOR_ONLY':
+          // Genera QR, pagamento pending
+          const doorResponse = await fetch('/api/events/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId: eventId }),
+          });
+
+          const doorData = await doorResponse.json();
+
+          if (!doorResponse.ok) {
+            throw new Error(doorData.error || 'Errore registrazione');
+          }
+
+          setTicket(doorData.ticket);
+          break;
+
+        case 'PRE_SALE':
+        case 'FULL_TICKET':
+          // Redirect a Stripe Checkout
+          const stripeResponse = await fetch('/api/checkout/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId: eventId }),
+          });
+
+          const stripeData = await stripeResponse.json();
+
+          if (!stripeResponse.ok) {
+            throw new Error(stripeData.error || 'Errore creazione sessione pagamento');
+          }
+
+          if (stripeData.url) {
+            window.location.href = stripeData.url;
+          }
+          break;
+
+        default:
+          // Legacy: basato su ticketPrice
+          if (ticketPrice > 0) {
+            const legacyResponse = await fetch('/api/checkout/session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ eventId: eventId }),
+            });
+
+            const legacyData = await legacyResponse.json();
+
+            if (!legacyResponse.ok) {
+              throw new Error(legacyData.error || 'Errore creazione sessione pagamento');
+            }
+
+            if (legacyData.url) {
+              window.location.href = legacyData.url;
+            }
+          } else {
+            // Gratuito legacy
+            const legacyFreeResponse = await fetch('/api/tickets/issue', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                eventId: eventId,
+                userId: session?.user?.id,
+                type: 'FREE',
+                price: 0,
+                currency: 'EUR',
+              }),
+            });
+
+            const legacyFreeData = await legacyFreeResponse.json();
+
+            if (!legacyFreeResponse.ok) {
+              throw new Error(legacyFreeData.error || 'Errore creazione ticket');
+            }
+
+            setTicket(legacyFreeData.data || legacyFreeData.ticket);
+          }
       }
-
-      setTicket(data.data || data.ticket);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Errore conferma prenotazione');
     } finally {
@@ -103,6 +186,35 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     link.href = `data:image/png;base64,${ticket.qrData}`;
     link.download = `ticket-${ticket.code}.png`;
     link.click();
+  };
+
+  const getTicketTypeBadge = (ticketType: string) => {
+    switch (ticketType) {
+      case 'FREE_LIST':
+        return <Badge variant="secondary" className="bg-green-100 text-green-800">🟢 Evento Gratuito</Badge>;
+      case 'DOOR_ONLY':
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">🟡 Pagamento al Botteghino</Badge>;
+      case 'PRE_SALE':
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">🔵 Prevendita Online</Badge>;
+      case 'FULL_TICKET':
+        return <Badge variant="secondary" className="bg-red-100 text-red-800">🔴 Biglietto Intero</Badge>;
+      default:
+        return <Badge variant="outline">Ticket</Badge>;
+    }
+  };
+
+  const getButtonLabel = (ticketType: string) => {
+    switch (ticketType) {
+      case 'FREE_LIST':
+        return 'Prenota Gratis';
+      case 'DOOR_ONLY':
+        return 'Prenota (Paga in Loco)';
+      case 'PRE_SALE':
+      case 'FULL_TICKET':
+        return 'Acquista Ora';
+      default:
+        return event?.ticketPrice && event.ticketPrice > 0 ? 'Acquista' : 'Prenota';
+    }
   };
 
   if (status === 'loading' || loading) {
@@ -225,7 +337,10 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
               />
             </div>
           )}
-          <CardTitle>{event?.title}</CardTitle>
+          <div className="flex items-start justify-between mb-2">
+            <CardTitle className="flex-1">{event?.title}</CardTitle>
+            {event?.ticketType && getTicketTypeBadge(event.ticketType)}
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Event Details */}
@@ -273,10 +388,18 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
               <span className="font-semibold">Totale</span>
               <div className="flex items-center gap-1 text-2xl font-bold">
                 <Euro className="h-6 w-6" />
-                <span>0,00</span>
+                <span>{event?.ticketPrice ? event.ticketPrice.toFixed(2) : '0,00'}</span>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">Ingresso gratuito</p>
+            {event?.ticketType === 'FREE_LIST' && (
+              <p className="text-sm text-green-600 mt-1">Ingresso gratuito</p>
+            )}
+            {event?.ticketType === 'DOOR_ONLY' && (
+              <p className="text-sm text-yellow-600 mt-1">Pagamento all'ingresso</p>
+            )}
+            {(event?.ticketType === 'PRE_SALE' || event?.ticketType === 'FULL_TICKET') && (
+              <p className="text-sm text-muted-foreground mt-1">Pagamento online sicuro</p>
+            )}
           </div>
 
           {/* Confirm Button */}
@@ -286,7 +409,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
             className="w-full"
             size="lg"
           >
-            {creating ? 'Creazione in corso...' : 'Conferma Partecipazione'}
+            {creating ? 'Creazione in corso...' : event?.ticketType ? getButtonLabel(event.ticketType) : 'Conferma Partecipazione'}
           </Button>
 
           {error && (

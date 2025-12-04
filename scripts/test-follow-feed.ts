@@ -1,3 +1,4 @@
+(async function testFollowFeed() {
 const BASE_URL = 'http://localhost:3000';
 
 async function runTests() {
@@ -104,3 +105,4 @@ async function runTests() {
 }
 
 runTests().catch(console.error);
+})();

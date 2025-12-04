@@ -59,6 +59,20 @@ export default withAuth(
       // Authentication check handled by withAuth authorized callback
       // Onboarding completion checked client-side in page components
       
+      // --- MILESTONE 7: ROLE-BASED ACCESS ---
+      const token = req.nextauth?.token;
+      const role = token?.role as string | undefined;
+      
+      // Proteggi dashboard analytics (solo ADMIN)
+      if (pathname.startsWith("/dashboard/analytics") && role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/unauthorized", req.url));
+      }
+      
+      // Proteggi API analytics (solo ADMIN)
+      if (pathname.startsWith("/api/dashboard/stats/update") && role !== "ADMIN") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      }
+      
       return response;
       
     } catch (error) {
