@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
+import { sendPasswordResetEmail } from '@/lib/email';
 
 /**
  * POST /api/auth/forgot-password
  * Invia email di recupero password
- * 
- * TODO: Implementare invio email effettivo quando configureremo il servizio email
- * Per ora registra solo il token nel database
  */
 export async function POST(req: NextRequest) {
   try {
@@ -58,12 +56,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // TODO: Inviare email con link di reset
+    // Invia email con link di reset
     const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}`;
-    // await sendPasswordResetEmail(user.email, user.firstName, resetUrl);
+    await sendPasswordResetEmail(user.email, user.firstName || 'Utente', resetUrl);
 
     console.log('[Forgot Password] Reset token generated for:', email);
-    console.log('[Forgot Password] Reset URL (TODO: send via email):', resetUrl);
+    console.log('[Forgot Password] Reset URL sent via email:', resetUrl);
     console.log('[Forgot Password] Token expires at:', resetTokenExpiry.toISOString());
 
     return NextResponse.json({
